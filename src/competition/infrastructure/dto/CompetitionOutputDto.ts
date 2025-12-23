@@ -4,4 +4,5 @@ export class CompetitionOutputDto {
   season: string;
   category: string;
   teamIds?: number[];
+  matchIds?: number[];
 }

@@ -26,7 +26,6 @@ export class UsersController {
     }
 
     // PROTECTED — recommend only admin uses this
-    @Roles('admin')
     @UseGuards(JwtAuthGuard, RolesGuard)
     @Post()
     createUser(
@@ -46,7 +45,6 @@ export class UsersController {
     }
 
     // PROTECTED — admin only
-    @Roles('admin')
     @UseGuards(JwtAuthGuard)
     @Delete(':id')
     deleteUser(

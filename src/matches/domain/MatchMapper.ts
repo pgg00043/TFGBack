@@ -1,6 +1,7 @@
 import { Match } from './Match';
 import { MatchInputDto } from '../infrastructure/dto/MatchInputDto';
 import { MatchOutputDto } from '../infrastructure/dto/MatchOutputDto';
+import { TeamMapper } from 'src/team/domain/TeamMapper';
 
 export class MatchMapper {
   static toEntity(dto: MatchInputDto): Match {
@@ -25,6 +26,7 @@ export class MatchMapper {
     return m;
   }
 
+
   static toOutput(entity: Match): MatchOutputDto {
     const dto = new MatchOutputDto();
 
@@ -33,12 +35,13 @@ export class MatchMapper {
     dto.hour = entity.hour;
     dto.location = entity.location;
 
-    dto.homeTeamId = entity.homeTeam?.id;
-    dto.awayTeamId = entity.awayTeam?.id;
+    dto.homeTeam = TeamMapper.toOutput(entity.homeTeam);
+    dto.awayTeam = TeamMapper.toOutput(entity.awayTeam);
     dto.competitionId = entity.competition?.id;
 
     return dto;
   }
+
 
   static toOutputList(entities: Match[]): MatchOutputDto[] {
     return entities.map(e => this.toOutput(e));

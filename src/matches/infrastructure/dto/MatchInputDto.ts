@@ -2,8 +2,8 @@ export class MatchInputDto {
   date: Date;
   hour: string;
   location: string;
-  scoreHome: number;
-  scoreAway: number;
+  scoreHome?: number = 0;
+  scoreAway?: number = 0;
   homeTeamId?: number;
   awayTeamId?: number;
   competitionId?: number;

@@ -18,10 +18,10 @@ export class Match{
     location: string;
 
     @Column()
-    scoreHome: number;
+    scoreHome: number = 0;
 
     @Column()
-    scoreAway: number;
+    scoreAway: number = 0;
 
     @ManyToOne(() => Team, {eager: true})
     homeTeam: Team;

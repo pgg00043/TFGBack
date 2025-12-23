@@ -26,7 +26,6 @@ export class TeamController {
     }
 
     // Solo admin puede crear equipos
-    @Roles('admin')
     @UseGuards(JwtAuthGuard, RolesGuard)
     @Post()
     createTeam(
@@ -36,7 +35,6 @@ export class TeamController {
     }
 
     // Solo admin puede editar equipos
-    @Roles('admin')
     @UseGuards(JwtAuthGuard, RolesGuard)
     @Patch(':id')
     updateTeam(
@@ -47,7 +45,6 @@ export class TeamController {
     }
 
     // Solo admin puede eliminar equipos
-    @Roles('admin')
     @UseGuards(JwtAuthGuard, RolesGuard)
     @Delete(':id')
     deleteTeam(@Param('id', ParseIntPipe) id: number) {

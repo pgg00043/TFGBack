@@ -20,4 +20,18 @@ export class Team {
     @ManyToMany(() => Competition, competition => competition.teams)
     competitions: Competition[];
 
+    @Column()
+    played: number = 0;
+
+    @Column()
+    won: number = 0;
+
+    @Column()
+    lost: number = 0;
+
+    @Column()
+    pointsFor: number = 0;
+
+    @Column()
+    pointsAgainst: number = 0;
 }

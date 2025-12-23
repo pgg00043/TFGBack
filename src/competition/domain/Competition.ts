@@ -1,5 +1,6 @@
-import { Column, Entity, JoinTable, ManyToMany, PrimaryGeneratedColumn } from "typeorm";
+import { Column, Entity, JoinTable, ManyToMany, OneToMany, PrimaryGeneratedColumn } from "typeorm";
 import { Team } from "src/team/domain/Team";
+import { Match } from "src/matches/domain/Match";
 
 @Entity()
 export class Competition {
@@ -15,4 +16,7 @@ export class Competition {
     @ManyToMany(() => Team, team => team.competitions,{eager: true})
     @JoinTable()
     teams: Team[];
+
+    @OneToMany(() => Match, match => match.competition)
+    matches: Match[];
 }

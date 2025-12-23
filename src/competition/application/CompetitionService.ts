@@ -6,6 +6,9 @@ import { CompetitionInputDto } from '../infrastructure/dto/CompetitionInputDto';
 import { CompetitionUpdateInputDto } from '../infrastructure/dto/CompetitionUpdateInputDto';
 import { CompetitionOutputDto } from '../infrastructure/dto/CompetitionOutputDto';
 import { CompetitionMapper } from '../domain/CompetitionMapper';
+import { TeamOutputDto } from 'src/team/infrastructure/dto/TeamOutputDto';
+import { TeamMapper } from 'src/team/domain/TeamMapper';
+import { MatchMapper } from 'src/matches/domain/MatchMapper';
 
 @Injectable()
 export class CompetitionService {
@@ -81,6 +84,38 @@ export class CompetitionService {
 
         competition.teams = competition.teams.filter(team => team.id !== teamId);
 
+        const saved = await this.competitionRepository.save(competition);
+        return CompetitionMapper.toOutput(saved);
+    }
+
+    async getTeamsInCompetition(competitionId: number): Promise<TeamOutputDto[]> {
+        const competition = await this.competitionRepository.findOne({
+            where: { id: competitionId },
+            relations: ['teams'],
+        });
+
+        return TeamMapper.toOutputList(competition?.teams || []);
+    }
+
+    async getMatchesInCompetition(competitionId: number): Promise<any[]> {
+        const competition = await this.competitionRepository.findOne({
+            where: { id: competitionId },
+            relations: ['matches'],
+        });
+
+        return MatchMapper.toOutputList(competition?.matches || []);
+    }
+
+    async addMatchToCompetition(competitionId: number, matchId: number): Promise<CompetitionOutputDto | null> {
+        const competition = await this.competitionRepository.findOne({
+            where: { id: competitionId },
+            relations: ['matches'],
+        });
+        if (!competition) throw new NotFoundException(`Competition ${competitionId} not found`);
+        const alreadyAdded = competition.matches.some(m => m.id === matchId);
+        if (!alreadyAdded) {
+            competition.matches.push({ id: matchId } as any);
+        }
         const saved = await this.competitionRepository.save(competition);
         return CompetitionMapper.toOutput(saved);
     }

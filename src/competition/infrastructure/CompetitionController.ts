@@ -4,8 +4,8 @@ import { CompetitionInputDto } from './dto/CompetitionInputDto';
 import { CompetitionUpdateInputDto } from './dto/CompetitionUpdateInputDto';
 import { CompetitionOutputDto } from './dto/CompetitionOutputDto';
 import { JwtAuthGuard } from 'src/auth/JwtAuthGuard';
-import { Roles } from 'src/auth/RolesDecorator';
 import { RolesGuard } from 'src/auth/RolesGuard';
+import { User } from 'src/users/domain/User';
 
 @Controller('competition')
 export class CompetitionController {
@@ -25,8 +25,6 @@ export class CompetitionController {
         return this.competitionService.findOne(id);
     }
 
-    // Solo admin crea competiciones
-    @Roles('admin')
     @UseGuards(JwtAuthGuard, RolesGuard)
     @Post()
     createCompetition(
@@ -36,7 +34,6 @@ export class CompetitionController {
     }
 
     // Solo admin actualiza competiciones
-    @Roles('admin')
     @UseGuards(JwtAuthGuard, RolesGuard)
     @Patch(':id')
     updateCompetition(
@@ -47,7 +44,6 @@ export class CompetitionController {
     }
 
     // Solo admin elimina competiciones
-    @Roles('admin')
     @UseGuards(JwtAuthGuard, RolesGuard)
     @Delete(':id')
     deleteCompetition(@Param('id', ParseIntPipe) id: number) {
@@ -55,9 +51,8 @@ export class CompetitionController {
     }
 
     // Solo admin puede añadir equipos a competiciones
-    @Roles('admin')
     @UseGuards(JwtAuthGuard, RolesGuard)
-    @Patch(':id/add-team/:teamId')
+    @Patch(':id/team/:teamId')
     addTeamToCompetition(
         @Param('id', ParseIntPipe) competitionId: number,
         @Param('teamId', ParseIntPipe) teamId: number,
@@ -66,7 +61,6 @@ export class CompetitionController {
     }
 
     // Solo admin puede quitar equipos de competiciones
-    @Roles('admin')
     @UseGuards(JwtAuthGuard, RolesGuard)
     @Patch(':id/remove-team/:teamId')
     removeTeamFromCompetition(
@@ -74,5 +68,30 @@ export class CompetitionController {
         @Param('teamId', ParseIntPipe) teamId: number,
     ): Promise<CompetitionOutputDto | null> {
         return this.competitionService.removeTeamFromCompetition(competitionId, teamId);
+    }
+
+    @UseGuards(JwtAuthGuard, RolesGuard)
+    @Get(':id/teams')
+    getTeamsInCompetition(
+        @Param('id', ParseIntPipe) competitionId: number,
+    ): Promise<any[]> {
+        return this.competitionService.getTeamsInCompetition(competitionId);
+    }
+
+    @UseGuards(JwtAuthGuard, RolesGuard)
+    @Get(':id/matches')
+    getMatchesInCompetition(
+        @Param('id', ParseIntPipe) competitionId: number,
+    ): Promise<any[]> {
+        return this.competitionService.getMatchesInCompetition(competitionId);
+    }
+
+    @UseGuards(JwtAuthGuard, RolesGuard)
+    @Patch(':id/match/:matchId')
+    addMatchToCompetition(
+        @Param('id', ParseIntPipe) competitionId: number,
+        @Param('matchId', ParseIntPipe) matchId: number,
+    ): Promise<CompetitionOutputDto | null> {
+        return this.competitionService.addMatchToCompetition(competitionId, matchId);
     }
 }
