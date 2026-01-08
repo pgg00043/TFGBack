@@ -11,4 +11,5 @@ export class MatchOutputDto {
   homeTeam?: TeamOutputDto;
   awayTeam?: TeamOutputDto;
   competitionId?: number;
+  Stats?: any[];
 }

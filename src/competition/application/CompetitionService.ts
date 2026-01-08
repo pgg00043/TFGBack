@@ -34,8 +34,9 @@ export class CompetitionService {
         return competition ? CompetitionMapper.toOutput(competition) : null;
     }
 
-    async createCompetition(dto: CompetitionInputDto): Promise<CompetitionOutputDto> {
+    async createCompetition(dto: CompetitionInputDto, userId: number): Promise<CompetitionOutputDto> {
         const entity = CompetitionMapper.toEntity(dto);
+        entity.owner = { id: userId } as any;
         const saved = await this.competitionRepository.save(entity);
         return CompetitionMapper.toOutput(saved);
     }
@@ -118,5 +119,20 @@ export class CompetitionService {
         }
         const saved = await this.competitionRepository.save(competition);
         return CompetitionMapper.toOutput(saved);
+    }
+
+    async findByOwner(userId: number) {
+        const competitions = await this.competitionRepository.find({
+            where: {
+            owner: { id: userId },
+            },
+            order: {
+                id: 'DESC',
+            },
+        });
+
+        return competitions.map(c =>
+            CompetitionMapper.toOutput(c),
+        );
     }
 }

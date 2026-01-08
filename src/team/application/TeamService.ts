@@ -6,6 +6,7 @@ import { TeamInputDto } from '../infrastructure/dto/TeamInputDto';
 import { TeamUpdateInputDto } from '../infrastructure/dto/TeamUpdateInputDto';
 import { TeamOutputDto } from '../infrastructure/dto/TeamOutputDto';
 import { TeamMapper } from '../domain/TeamMapper';
+import { UserOutputDto } from 'src/users/infrastructure/dto/UserOutputDto';
 
 @Injectable()
 export class TeamService {
@@ -53,5 +54,15 @@ export class TeamService {
     
     deleteTeam(id: number) {
         return this.teamRepository.delete(id);
+    }
+    
+    async getAllPlayersOfTeam(teamId: number): Promise<UserOutputDto[]> {
+        const team = await this.teamRepository.findOne({
+            where: { id: teamId },
+            relations: ['players'],
+        });
+        if (!team) throw new NotFoundException(`Team ${teamId} not found`);
+
+        return team.players;
     }
 }

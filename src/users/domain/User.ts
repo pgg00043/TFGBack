@@ -1,6 +1,7 @@
 import { Team } from 'src/team/domain/Team';
 import { Entity, PrimaryGeneratedColumn, Column, ManyToOne, ManyToMany, OneToMany } from 'typeorm';
 import { Stats } from 'src/stats/domain/Stat';
+import { Competition } from 'src/competition/domain/Competition';
 
 @Entity()
 export class User {
@@ -33,4 +34,8 @@ export class User {
 
   @OneToMany(() => Stats, stat => stat.user)
   stats: Stats[];
+  
+  @OneToMany(() => Competition, competition => competition.owner)
+  competitions: Competition[];
+
 }

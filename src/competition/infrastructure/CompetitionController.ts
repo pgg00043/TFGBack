@@ -1,23 +1,30 @@
-import { Body, Controller, Delete, Get, Param, ParseIntPipe, Patch, Post, UseGuards } from '@nestjs/common';
+import { Body, Controller, Delete, Get, Param, ParseIntPipe, Patch, Post, Req, UseGuards } from '@nestjs/common';
 import { CompetitionService } from '../application/CompetitionService';
 import { CompetitionInputDto } from './dto/CompetitionInputDto';
 import { CompetitionUpdateInputDto } from './dto/CompetitionUpdateInputDto';
 import { CompetitionOutputDto } from './dto/CompetitionOutputDto';
 import { JwtAuthGuard } from 'src/auth/JwtAuthGuard';
 import { RolesGuard } from 'src/auth/RolesGuard';
-import { User } from 'src/users/domain/User';
+import type { Request } from 'express';
 
 @Controller('competition')
 export class CompetitionController {
     constructor(private readonly competitionService: CompetitionService) {}
 
-    // Público
     @Get()
     findAll(): Promise<CompetitionOutputDto[]> {
         return this.competitionService.findAll();
     }
 
-    // Público
+    @UseGuards(JwtAuthGuard)
+    @Get('my')
+    findMyCompetitions(
+        @Req() req: Request,
+    ) {
+        const user = req.user as { id: number };
+        return this.competitionService.findByOwner(user.id);
+    }
+
     @Get(':id')
     findOne(
         @Param('id', ParseIntPipe) id: number
@@ -25,15 +32,17 @@ export class CompetitionController {
         return this.competitionService.findOne(id);
     }
 
-    @UseGuards(JwtAuthGuard, RolesGuard)
+    @UseGuards(JwtAuthGuard)
     @Post()
     createCompetition(
-        @Body() dto: CompetitionInputDto
+        @Body() dto: CompetitionInputDto,
+        @Req() req: Request,
     ): Promise<CompetitionOutputDto> {
-        return this.competitionService.createCompetition(dto);
+        const user = req.user as { id: number };
+        return this.competitionService.createCompetition(dto, user.id);
     }
 
-    // Solo admin actualiza competiciones
+
     @UseGuards(JwtAuthGuard, RolesGuard)
     @Patch(':id')
     updateCompetition(
@@ -43,14 +52,12 @@ export class CompetitionController {
         return this.competitionService.updateCompetition(id, dto);
     }
 
-    // Solo admin elimina competiciones
     @UseGuards(JwtAuthGuard, RolesGuard)
     @Delete(':id')
     deleteCompetition(@Param('id', ParseIntPipe) id: number) {
         return this.competitionService.deleteCompetition(id);
     }
 
-    // Solo admin puede añadir equipos a competiciones
     @UseGuards(JwtAuthGuard, RolesGuard)
     @Patch(':id/team/:teamId')
     addTeamToCompetition(
@@ -60,7 +67,6 @@ export class CompetitionController {
         return this.competitionService.addTeamToCompetition(competitionId, teamId);
     }
 
-    // Solo admin puede quitar equipos de competiciones
     @UseGuards(JwtAuthGuard, RolesGuard)
     @Patch(':id/remove-team/:teamId')
     removeTeamFromCompetition(
@@ -94,4 +100,6 @@ export class CompetitionController {
     ): Promise<CompetitionOutputDto | null> {
         return this.competitionService.addMatchToCompetition(competitionId, matchId);
     }
+    
+    
 }

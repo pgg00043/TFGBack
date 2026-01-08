@@ -50,4 +50,12 @@ export class TeamController {
     deleteTeam(@Param('id', ParseIntPipe) id: number) {
         return this.teamService.deleteTeam(id);
     }
+
+    @UseGuards(JwtAuthGuard)
+    @Get(':id/players')
+    getAllPlayersOfTeam(
+        @Param('id', ParseIntPipe) id: number
+    ) {
+        return this.teamService.getAllPlayersOfTeam(id);
+    }
 }
