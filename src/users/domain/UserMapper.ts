@@ -26,10 +26,6 @@ export class UserMapper {
     dto.email = entity.email;
     dto.rol = entity.rol;
 
-    if (entity.team) {
-      dto.teamId = entity.team.id;
-    }
-
     return dto;
   }
 

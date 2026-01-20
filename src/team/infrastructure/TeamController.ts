@@ -1,23 +1,28 @@
-import { Body, Controller, Delete, Get, Param, ParseIntPipe, Patch, Post, UseGuards } from '@nestjs/common';
+import { Body, Controller, Delete, Get, Param, ParseIntPipe, Patch, Post, Req, UseGuards } from '@nestjs/common';
 import { TeamService } from '../application/TeamService';
 import { TeamInputDto } from './dto/TeamInputDto';
 import { TeamUpdateInputDto } from './dto/TeamUpdateInputDto';
 import { TeamOutputDto } from './dto/TeamOutputDto';
 import { JwtAuthGuard } from 'src/auth/JwtAuthGuard';
-import { Roles } from 'src/auth/RolesDecorator';
-import { RolesGuard } from 'src/auth/RolesGuard';
+import type { Request } from 'express';
 
 @Controller('team')
 export class TeamController {
     constructor(private readonly teamService: TeamService) {}
 
-    // Público
+    @UseGuards(JwtAuthGuard)
+    @Get('my')
+    getMyTeams(@Req() req: Request): Promise<TeamOutputDto[]> {
+        const requester = req.user as { userId: number };
+        return this.teamService.getMyTeams(requester.userId);
+    }
+    
+    @UseGuards(JwtAuthGuard)
     @Get()
     findAll(): Promise<TeamOutputDto[]> {
         return this.teamService.findAll();
     }
 
-    // Público
     @Get(':id')
     findOne(
         @Param('id', ParseIntPipe) id: number
@@ -25,17 +30,17 @@ export class TeamController {
         return this.teamService.findOne(id);
     }
 
-    // Solo admin puede crear equipos
-    @UseGuards(JwtAuthGuard, RolesGuard)
+    @UseGuards(JwtAuthGuard)
     @Post()
     createTeam(
-        @Body() dto: TeamInputDto
+        @Body() dto: TeamInputDto,
+        @Req() req: Request,
     ): Promise<TeamOutputDto> {
-        return this.teamService.createTeam(dto);
+        const user = req.user as { userId: number };
+        return this.teamService.createTeam(dto, user.userId);
     }
 
-    // Solo admin puede editar equipos
-    @UseGuards(JwtAuthGuard, RolesGuard)
+    @UseGuards(JwtAuthGuard)
     @Patch(':id')
     updateTeam(
         @Param('id', ParseIntPipe) id: number,
@@ -44,8 +49,7 @@ export class TeamController {
         return this.teamService.updateTeam(id, dto);
     }
 
-    // Solo admin puede eliminar equipos
-    @UseGuards(JwtAuthGuard, RolesGuard)
+    @UseGuards(JwtAuthGuard)
     @Delete(':id')
     deleteTeam(@Param('id', ParseIntPipe) id: number) {
         return this.teamService.deleteTeam(id);
@@ -58,4 +62,7 @@ export class TeamController {
     ) {
         return this.teamService.getAllPlayersOfTeam(id);
     }
+
+    
+
 }

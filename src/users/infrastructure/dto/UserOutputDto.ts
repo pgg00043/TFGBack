@@ -5,5 +5,4 @@ export class UserOutputDto {
   surname: string;
   email: string;
   rol: string;
-  teamId?: number;
 }

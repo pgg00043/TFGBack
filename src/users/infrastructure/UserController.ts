@@ -1,23 +1,21 @@
-import { Body, Controller, Delete, Get, Param, ParseIntPipe, Patch, Post, UseGuards } from '@nestjs/common';
+import { Body, Controller, Delete, Get, Param, ParseIntPipe, Patch, Post, Req, UseGuards } from '@nestjs/common';
+import type { Request } from 'express';
 import { UsersService } from '../application/UserService';
 import { UserInputDto } from './dto/UserInputDto';
 import { UserUpdateInputDto } from './dto/UserUpdateInputDto';
 import { UserOutputDto } from './dto/UserOutputDto';
 import { JwtAuthGuard } from 'src/auth/JwtAuthGuard';
-import { Roles } from 'src/auth/RolesDecorator';
 import { RolesGuard } from 'src/auth/RolesGuard';
 
 @Controller('users')
 export class UsersController {
     constructor(private readonly usersService: UsersService) {}
 
-    // PUBLIC
     @Get()
     findAll(): Promise<UserOutputDto[]> {
         return this.usersService.findAll();
     }
 
-    // PUBLIC
     @Get(':id')
     findOne(
         @Param('id', ParseIntPipe) id: number
@@ -25,7 +23,6 @@ export class UsersController {
         return this.usersService.findOne(id);
     }
 
-    // PROTECTED — recommend only admin uses this
     @UseGuards(JwtAuthGuard, RolesGuard)
     @Post()
     createUser(
@@ -34,7 +31,6 @@ export class UsersController {
         return this.usersService.createUser(dto);
     }
 
-    // PROTECTED — the logged user or admin (roles later)
     @UseGuards(JwtAuthGuard)
     @Patch(':id')
     updateUser(
@@ -53,28 +49,18 @@ export class UsersController {
         return this.usersService.deleteUser(id);
     }
 
-    // PROTECTED — admin only
-    @Roles('admin')
     @UseGuards(JwtAuthGuard)
     @Patch(':userId/team/:teamId')
     assignTeamToUser(
         @Param('userId', ParseIntPipe) userId: number,
-        @Param('teamId', ParseIntPipe) teamId: number
+        @Param('teamId', ParseIntPipe) teamId: number,
+        @Req() req: Request,
     ): Promise<UserOutputDto | null> {
-        return this.usersService.assignTeamToUser(userId, teamId);
+        const requester = req.user as {userId: number};
+        return this.usersService.assignTeamToUser(userId, teamId, requester.userId);
     }
 
-    // PROTECTED — any authenticated user
-    @UseGuards(JwtAuthGuard)
-    @Patch(':userId/follow/:teamId')
-    followTeam(
-        @Param('userId', ParseIntPipe) userId: number,
-        @Param('teamId', ParseIntPipe) teamId: number
-    ): Promise<UserOutputDto | null> {
-        return this.usersService.followTeam(userId, teamId);
-    }
-
-    // PUBLIC
+    
     @Get(':id/stats')
     getUserStats(
         @Param('id', ParseIntPipe) id: number
@@ -82,7 +68,6 @@ export class UsersController {
         return this.usersService.getUserStats(id);
     }
 
-    // PUBLIC
     @Get(':id/stats/summary')
     getUserStatsSummary(
         @Param('id', ParseIntPipe) id: number

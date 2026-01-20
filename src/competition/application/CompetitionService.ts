@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { ForbiddenException, Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Competition } from '../domain/Competition';
@@ -58,13 +58,17 @@ export class CompetitionService {
         return this.competitionRepository.delete(id);
     }
 
-    async addTeamToCompetition(competitionId: number, teamId: number): Promise<CompetitionOutputDto | null> {
+    async addTeamToCompetition(competitionId: number, teamId: number, requesterUserId: number): Promise<CompetitionOutputDto | null> {
         const competition = await this.competitionRepository.findOne({
             where: { id: competitionId },
-            relations: ['teams'],
+            relations: ['teams', 'owner'],
         });
 
         if (!competition) throw new NotFoundException(`Competition ${competitionId} not found`);
+
+        if(competition.owner.id != requesterUserId){
+            throw new ForbiddenException('Only the team owner can add users to the team',);
+        }
 
         const alreadyAdded = competition.teams.some(t => t.id === teamId);
         if (!alreadyAdded) {

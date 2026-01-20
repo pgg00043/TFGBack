@@ -32,11 +32,14 @@ export class TeamService {
         return TeamMapper.toOutputList(teams);
     }
 
-    async createTeam(dto: TeamInputDto): Promise<TeamOutputDto> {
+    async createTeam(dto: TeamInputDto, ownerId: number): Promise<TeamOutputDto> {
         const entity = TeamMapper.toEntity(dto);
+        entity.owner = { id: ownerId } as any;
+
         const saved = await this.teamRepository.save(entity);
         return TeamMapper.toOutput(saved);
     }
+
 
     async updateTeam(id: number, dto: TeamUpdateInputDto): Promise<TeamOutputDto | null> {
         const exists = await this.teamRepository.findOneBy({ id });
@@ -65,4 +68,15 @@ export class TeamService {
 
         return team.players;
     }
+
+    async getMyTeams(userId: number): Promise<TeamOutputDto[]> {
+    const teams = await this.teamRepository.find({
+        where: {
+        owner: { id: userId },
+        },
+    });
+
+    return TeamMapper.toOutputList(teams);
+    }
 }
+

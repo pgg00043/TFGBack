@@ -1,4 +1,4 @@
-import { Entity, PrimaryGeneratedColumn, Column, ManyToMany, OneToMany, JoinTable } from 'typeorm';
+import { Entity, PrimaryGeneratedColumn, Column, ManyToMany, OneToMany, JoinTable, ManyToOne, JoinColumn } from 'typeorm';
 import { User } from 'src/users/domain/User';
 import { Competition } from 'src/competition/domain/Competition';
 
@@ -10,12 +10,8 @@ export class Team {
     @Column()
     name: string;
 
-    @OneToMany(() => User, user => user.team)
+    @ManyToMany(() => User, user => user.teams)
     players: User[];
-
-    @ManyToMany(() => User, user => user.followedTeams)
-    @JoinTable()
-    followers: User[];
     
     @ManyToMany(() => Competition, competition => competition.teams)
     competitions: Competition[];
@@ -34,4 +30,9 @@ export class Team {
 
     @Column()
     pointsAgainst: number = 0;
+
+    @ManyToOne(() => User, user => user.ownedTeams, { nullable: false })
+    @JoinColumn({ name: 'owner_id' })
+    owner: User;
+
 }

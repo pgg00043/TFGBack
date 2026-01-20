@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { ForbiddenException, Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { User } from '../domain/User';
@@ -25,7 +25,7 @@ export class UsersService {
 
     async findAll(): Promise<UserOutputDto[]> {
         const users = await this.userRepository.find({
-            relations: ['team', 'followedTeams'],
+            relations: ['teams', 'ownedTeams'],
         });
 
         return UserMapper.toOutputList(users);
@@ -34,7 +34,7 @@ export class UsersService {
     async findOne(id: number): Promise<UserOutputDto | null> {
         const user = await this.userRepository.findOne({
             where: { id },
-            relations: ['team', 'followedTeams'],
+            relations: ['teams', 'ownedTeams'],
         });
 
         return user ? UserMapper.toOutput(user) : null;
@@ -66,7 +66,7 @@ export class UsersService {
 
         const updated = await this.userRepository.findOne({
         where: { id },
-        relations: ['team', 'followedTeams'],
+        relations: ['teams', 'ownedTeams'],
         });
 
         return UserMapper.toOutput(updated!);
@@ -76,36 +76,36 @@ export class UsersService {
         return this.userRepository.delete(id);
     }
 
-    async assignTeamToUser(userId: number, teamId: number): Promise<UserOutputDto | null> {
-        const user = await this.userRepository.findOneBy({ id: userId });
-        if (!user) throw new NotFoundException(`User ${userId} not found`);
-
-        const team = await this.teamRepository.findOneBy({ id: teamId });
-        if (!team) throw new NotFoundException(`Team ${teamId} not found`);
-
-        user.team = team;
-        const saved = await this.userRepository.save(user);
-
-        return UserMapper.toOutput(saved);
-    }
-
-    async followTeam(userId: number, teamId: number): Promise<UserOutputDto | null> {
-        const user = await this.userRepository.findOne({
-            where: { id: userId },
-            relations: ['followedTeams'],
+    async assignTeamToUser(targetUserId: number, teamId: number, requesterUserId: number,): Promise<UserOutputDto> {
+        const team = await this.teamRepository.findOne({
+            where: { id: teamId },
+            relations: ['owner'],
         });
-        if (!user) throw new NotFoundException(`User ${userId} not found`);
-
-        const team = await this.teamRepository.findOneBy({ id: teamId });
-        if (!team) throw new NotFoundException(`Team ${teamId} not found`);
-
-        const alreadyFollowing = user.followedTeams.some(t => t.id === teamId);
-        if (!alreadyFollowing) {
-            user.followedTeams.push(team);
+        
+        if (!team) {
+            throw new NotFoundException(`Team ${teamId} not found`);
         }
 
-        const saved = await this.userRepository.save(user);
-        return UserMapper.toOutput(saved);
+        if (team.owner.id !== requesterUserId) {
+            throw new ForbiddenException(
+                'Only the team owner can add users to the team',
+            );
+        }
+
+        const user = await this.userRepository.findOne({
+            where: { id: targetUserId },
+            relations: ['teams'],
+        });
+        if (!user) {
+            throw new NotFoundException(`User ${targetUserId} not found`);
+        }
+
+        if (!user.teams.some(t => t.id === team.id)) {
+            user.teams.push(team);
+            await this.userRepository.save(user);
+        }
+
+        return UserMapper.toOutput(user);
     }
 
     async getUserStats(userId: number) {

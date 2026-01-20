@@ -15,9 +15,9 @@ import { AuthModule } from './auth/AuthModule';
     TypeOrmModule.forRoot({
       type: 'mysql',
       host: 'localhost',
-      port: 3307,
+      port: 3306,
       username: 'root',
-      password: 'pegege',
+      password: '',
       database: 'basket_league', 
       autoLoadEntities: true,
       synchronize: true, //solo en desarrollo

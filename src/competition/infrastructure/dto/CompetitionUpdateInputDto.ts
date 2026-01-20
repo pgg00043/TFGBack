@@ -7,9 +7,5 @@ export class CompetitionUpdateInputDto {
 
   @IsOptional()
   @IsString()
-  season?: string;
-
-  @IsOptional()
-  @IsString()
   category?: string;
 }

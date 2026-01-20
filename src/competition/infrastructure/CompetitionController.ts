@@ -4,7 +4,6 @@ import { CompetitionInputDto } from './dto/CompetitionInputDto';
 import { CompetitionUpdateInputDto } from './dto/CompetitionUpdateInputDto';
 import { CompetitionOutputDto } from './dto/CompetitionOutputDto';
 import { JwtAuthGuard } from 'src/auth/JwtAuthGuard';
-import { RolesGuard } from 'src/auth/RolesGuard';
 import type { Request } from 'express';
 
 @Controller('competition')
@@ -21,8 +20,8 @@ export class CompetitionController {
     findMyCompetitions(
         @Req() req: Request,
     ) {
-        const user = req.user as { id: number };
-        return this.competitionService.findByOwner(user.id);
+        const user = req.user as { userId: number };
+        return this.competitionService.findByOwner(user.userId);
     }
 
     @Get(':id')
@@ -38,12 +37,12 @@ export class CompetitionController {
         @Body() dto: CompetitionInputDto,
         @Req() req: Request,
     ): Promise<CompetitionOutputDto> {
-        const user = req.user as { id: number };
-        return this.competitionService.createCompetition(dto, user.id);
+        const user = req.user as { userId: number };
+        return this.competitionService.createCompetition(dto, user.userId);
     }
 
 
-    @UseGuards(JwtAuthGuard, RolesGuard)
+    @UseGuards(JwtAuthGuard)
     @Patch(':id')
     updateCompetition(
         @Param('id', ParseIntPipe) id: number,
@@ -52,22 +51,24 @@ export class CompetitionController {
         return this.competitionService.updateCompetition(id, dto);
     }
 
-    @UseGuards(JwtAuthGuard, RolesGuard)
+    @UseGuards(JwtAuthGuard)
     @Delete(':id')
     deleteCompetition(@Param('id', ParseIntPipe) id: number) {
         return this.competitionService.deleteCompetition(id);
     }
 
-    @UseGuards(JwtAuthGuard, RolesGuard)
+    @UseGuards(JwtAuthGuard)
     @Patch(':id/team/:teamId')
     addTeamToCompetition(
         @Param('id', ParseIntPipe) competitionId: number,
         @Param('teamId', ParseIntPipe) teamId: number,
+        @Req() req: Request,
     ): Promise<CompetitionOutputDto | null> {
-        return this.competitionService.addTeamToCompetition(competitionId, teamId);
+        const requester = req.user as {userId: number};      
+        return this.competitionService.addTeamToCompetition(competitionId, teamId, requester.userId);
     }
 
-    @UseGuards(JwtAuthGuard, RolesGuard)
+    @UseGuards(JwtAuthGuard)
     @Patch(':id/remove-team/:teamId')
     removeTeamFromCompetition(
         @Param('id', ParseIntPipe) competitionId: number,
@@ -76,7 +77,7 @@ export class CompetitionController {
         return this.competitionService.removeTeamFromCompetition(competitionId, teamId);
     }
 
-    @UseGuards(JwtAuthGuard, RolesGuard)
+    @UseGuards(JwtAuthGuard)
     @Get(':id/teams')
     getTeamsInCompetition(
         @Param('id', ParseIntPipe) competitionId: number,
@@ -84,7 +85,7 @@ export class CompetitionController {
         return this.competitionService.getTeamsInCompetition(competitionId);
     }
 
-    @UseGuards(JwtAuthGuard, RolesGuard)
+    @UseGuards(JwtAuthGuard)
     @Get(':id/matches')
     getMatchesInCompetition(
         @Param('id', ParseIntPipe) competitionId: number,
@@ -92,7 +93,7 @@ export class CompetitionController {
         return this.competitionService.getMatchesInCompetition(competitionId);
     }
 
-    @UseGuards(JwtAuthGuard, RolesGuard)
+    @UseGuards(JwtAuthGuard)
     @Patch(':id/match/:matchId')
     addMatchToCompetition(
         @Param('id', ParseIntPipe) competitionId: number,
