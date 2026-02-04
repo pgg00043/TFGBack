@@ -10,6 +10,8 @@ import { MatchesModule } from './matches/infrastructure/MatchModule';
 import { StatsModule } from './stats/infrastructure/StatsModule';
 import { AuthModule } from './auth/AuthModule';
 import { join } from 'path';
+import 'dotenv/config';
+
 
 
 @Module({
@@ -20,14 +22,15 @@ import { join } from 'path';
     }),
     TypeOrmModule.forRoot({
       type: 'mysql',
-      host: 'localhost',
-      port: 3306,
-      username: 'root',
-      password: '',
-      database: 'basket_league', 
+      host: process.env.DB_HOST,
+      port: Number(process.env.DB_PORT),
+      username: process.env.DB_USERNAME,
+      password: process.env.DB_PASSWORD,
+      database: process.env.DB_NAME,
       autoLoadEntities: true,
       synchronize: false,
     }),
+
     UsersModule,
     TeamModule,
     CompetitionModule,
