@@ -26,7 +26,7 @@ import { join } from 'path';
       password: '',
       database: 'basket_league', 
       autoLoadEntities: true,
-      synchronize: true, //solo en desarrollo
+      synchronize: false,
     }),
     UsersModule,
     TeamModule,
