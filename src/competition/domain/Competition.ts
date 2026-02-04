@@ -14,6 +14,9 @@ export class Competition {
     @Column()
     category: string;
 
+    @Column()
+    imageUrl: string;
+
     @ManyToMany(() => Team, team => team.competitions,{eager: true})
     @JoinTable()
     teams: Team[];

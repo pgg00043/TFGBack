@@ -18,7 +18,7 @@ export class TeamService {
     async findOne(id: number): Promise<TeamOutputDto | null> {
         const team = await this.teamRepository.findOne({
             where: { id },
-            relations: ['players', 'competitions'],
+            relations: ['players', 'competitions', 'owner'],
         });
 
         return team ? TeamMapper.toOutput(team) : null;
@@ -70,13 +70,18 @@ export class TeamService {
     }
 
     async getMyTeams(userId: number): Promise<TeamOutputDto[]> {
-    const teams = await this.teamRepository.find({
-        where: {
-        owner: { id: userId },
-        },
-    });
+        const teams = await this.teamRepository.find({
+            where: {
+            owner: { id: userId },
+            },
+        });
 
-    return TeamMapper.toOutputList(teams);
+        return TeamMapper.toOutputList(teams);
     }
+
+    async updateImage(teamId: number, imageUrl: string) {
+        await this.teamRepository.update(teamId, { imageUrl });
+    }
+
 }
 

@@ -11,7 +11,6 @@ export class UserMapper {
     user.name = dto.name;
     user.surname = dto.surname;
     user.email = dto.email;
-    user.rol = dto.rol;
 
     return user;
   }
@@ -24,8 +23,7 @@ export class UserMapper {
     dto.name = entity.name;
     dto.surname = entity.surname;
     dto.email = entity.email;
-    dto.rol = entity.rol;
-
+    dto.imageUrl = entity.imageUrl;
     return dto;
   }
 

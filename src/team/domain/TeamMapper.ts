@@ -24,13 +24,25 @@ export class TeamMapper {
     dto.lost = entity.lost;
     dto.pointsFor = entity.pointsFor;
     dto.pointsAgainst = entity.pointsAgainst;
+    dto.imageUrl = entity.imageUrl;
 
     if (entity.players) {
-      dto.players = entity.players.map(p => p.id);
+      dto.players = entity.players.map(p => ({
+        id: p.id,
+        name: p.name,
+        surname: p.surname,
+        username: p.username,
+        email: p.email,
+        rol: p.rol
+      }));
     }
 
     if (entity.competitions) {
       dto.competitions = entity.competitions.map(c => c.id);
+    }
+
+    if (entity.owner) {
+      dto.owner = entity.owner;
     }
 
     return dto;

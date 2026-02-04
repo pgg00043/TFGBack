@@ -36,7 +36,6 @@ export class UsersService {
             where: { id },
             relations: ['teams', 'ownedTeams'],
         });
-
         return user ? UserMapper.toOutput(user) : null;
     }
 
@@ -120,6 +119,14 @@ export class UsersService {
         }));
     }
 
+    async searchUsersByName(name: string): Promise<UserOutputDto[]> {
+        const users = await this.userRepository.find({
+            where: { name: name },
+            relations: ['teams', 'ownedTeams'],
+        });
+        return UserMapper.toOutputList(users);
+    }
+
     async getUserStatsSummary(userId: number) {
         const stats = await this.statsRepository.find({
             where: { user: { id: userId } },
@@ -146,5 +153,9 @@ export class UsersService {
             avgRebounds: +(totalRebounds / gamesPlayed).toFixed(2),
             avgAssists: +(totalAssists / gamesPlayed).toFixed(2),
         };
+    }
+
+    async updateImage(userId: number, imageUrl: string) {
+        await this.userRepository.update(userId, { imageUrl });
     }
 }

@@ -1,6 +1,7 @@
 import { Stats } from './Stat';
 import { StatsInputDto } from '../infrastructure/dto/StatsInputDto';
 import { StatsOutputDto } from '../infrastructure/dto/StatsOutputDto';
+import { Team } from 'src/team/domain/Team';
 
 export class StatsMapper {
 

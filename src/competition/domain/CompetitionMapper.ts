@@ -11,18 +11,16 @@ export class CompetitionMapper {
   }
 
   static toOutput(entity: Competition): CompetitionOutputDto {
-    const dto = new CompetitionOutputDto();
-
-    dto.id = entity.id;
-    dto.name = entity.name;
-    dto.category = entity.category;
-
-    if (entity.teams) {
-      dto.teamIds = entity.teams.map(t => t.id);
-    }
-
-    return dto;
+    return {
+      id: entity.id,
+      name: entity.name,
+      category: entity.category,
+      teamIds: entity.teams?.map(t => t.id),
+      ownerId: entity.owner?.id ?? 0,
+      imageUrl: entity.imageUrl,
+    };
   }
+
 
   static toOutputList(entities: Competition[]): CompetitionOutputDto[] {
     return entities.map(e => this.toOutput(e));

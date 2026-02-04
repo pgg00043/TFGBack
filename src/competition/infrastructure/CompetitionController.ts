@@ -1,10 +1,12 @@
-import { Body, Controller, Delete, Get, Param, ParseIntPipe, Patch, Post, Req, UseGuards } from '@nestjs/common';
+import { Body, Controller, Delete, ForbiddenException, Get, Param, ParseIntPipe, Patch, Post, Req, UploadedFile, UseGuards, UseInterceptors } from '@nestjs/common';
 import { CompetitionService } from '../application/CompetitionService';
 import { CompetitionInputDto } from './dto/CompetitionInputDto';
 import { CompetitionUpdateInputDto } from './dto/CompetitionUpdateInputDto';
 import { CompetitionOutputDto } from './dto/CompetitionOutputDto';
 import { JwtAuthGuard } from 'src/auth/JwtAuthGuard';
 import type { Request } from 'express';
+import { diskStorage } from 'multer';
+import { FileInterceptor } from '@nestjs/platform-express';
 
 @Controller('competition')
 export class CompetitionController {
@@ -38,6 +40,7 @@ export class CompetitionController {
         @Req() req: Request,
     ): Promise<CompetitionOutputDto> {
         const user = req.user as { userId: number };
+        console.log('Creating competition for user:', user.userId);
         return this.competitionService.createCompetition(dto, user.userId);
     }
 
@@ -102,5 +105,38 @@ export class CompetitionController {
         return this.competitionService.addMatchToCompetition(competitionId, matchId);
     }
     
-    
+    @UseGuards(JwtAuthGuard)
+    @Post(":id/generate-matches")
+    generateMatches(
+        @Param('id') competitionId: number,
+        @Req() req: Request,
+    ) {
+        return this.competitionService.generateMatches(competitionId);
+    }
+
+    @Post(':id/image')
+    @UseGuards(JwtAuthGuard)
+    @UseInterceptors(
+    FileInterceptor('file', {
+        storage: diskStorage({
+        destination: './uploads/competitions',
+        filename: (_, file, cb) => {
+            const uniqueName =
+            Date.now() + '-' + Math.round(Math.random() * 1e9);
+            const safeName = file.originalname.replace(/\s+/g, '_');
+            cb(null, `${uniqueName}-${safeName}`);
+        },
+        }),
+    }),
+    )
+    uploadUserImage(
+        @Param('id', ParseIntPipe) id: number,
+        @UploadedFile() file: Express.Multer.File,
+        @Req() req: any,
+    ) {
+        return this.competitionService.updateImage(
+            id,
+            `/uploads/competitions/${file.filename}`,
+        );
+    }
 }

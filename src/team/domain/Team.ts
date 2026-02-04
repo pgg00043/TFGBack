@@ -31,6 +31,9 @@ export class Team {
     @Column()
     pointsAgainst: number = 0;
 
+    @Column({ nullable: true })
+    imageUrl?: string;
+
     @ManyToOne(() => User, user => user.ownedTeams, { nullable: false })
     @JoinColumn({ name: 'owner_id' })
     owner: User;

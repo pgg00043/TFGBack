@@ -1,4 +1,4 @@
-import { Body, Controller, Delete, Get, Param, ParseIntPipe, Patch, Post, Req, UseGuards } from '@nestjs/common';
+import { Body, Controller, Delete, ForbiddenException, Get, Param, ParseIntPipe, Patch, Post, Query, Req, UploadedFile, UseGuards, UseInterceptors } from '@nestjs/common';
 import type { Request } from 'express';
 import { UsersService } from '../application/UserService';
 import { UserInputDto } from './dto/UserInputDto';
@@ -6,10 +6,45 @@ import { UserUpdateInputDto } from './dto/UserUpdateInputDto';
 import { UserOutputDto } from './dto/UserOutputDto';
 import { JwtAuthGuard } from 'src/auth/JwtAuthGuard';
 import { RolesGuard } from 'src/auth/RolesGuard';
+import { diskStorage } from 'multer';
+import { FileInterceptor } from '@nestjs/platform-express';
 
 @Controller('users')
 export class UsersController {
     constructor(private readonly usersService: UsersService) {}
+
+    @Post(':id/image')
+    @UseGuards(JwtAuthGuard)
+    @UseInterceptors(
+    FileInterceptor('file', {
+        storage: diskStorage({
+        destination: './uploads/users',
+        filename: (_, file, cb) => {
+            const uniqueName =
+            Date.now() + '-' + Math.round(Math.random() * 1e9);
+            const safeName = file.originalname.replace(/\s+/g, '_');
+            cb(null, `${uniqueName}-${safeName}`);
+        },
+        }),
+    }),
+    )
+    uploadUserImage(
+        @Param('id', ParseIntPipe) id: number,
+        @UploadedFile() file: Express.Multer.File,
+        @Req() req: any,
+    ) {
+        if (!req.user || req.user.userId !== id) {
+            throw new ForbiddenException(
+            'No tienes permiso para modificar este usuario',
+            );
+        }
+
+        return this.usersService.updateImage(
+            id,
+            `/uploads/users/${file.filename}`,
+        );
+    }
+
 
     @Get()
     findAll(): Promise<UserOutputDto[]> {
@@ -74,4 +109,14 @@ export class UsersController {
     ) {
         return this.usersService.getUserStatsSummary(id);
     }
+
+    @Get('search')
+    searchUsersByName(
+        @Query("query") query: string
+    ) {
+        return this.usersService.searchUsersByName(query);
+    }
+
+    
+
 }

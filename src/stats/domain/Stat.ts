@@ -1,6 +1,7 @@
 import { Match } from 'src/matches/domain/Match';
 import { Entity, PrimaryGeneratedColumn, Column, ManyToOne } from 'typeorm';
 import { User } from 'src/users/domain/User';
+import { Team } from 'src/team/domain/Team';
 
 
 @Entity()

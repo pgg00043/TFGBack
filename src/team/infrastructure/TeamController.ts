@@ -1,10 +1,12 @@
-import { Body, Controller, Delete, Get, Param, ParseIntPipe, Patch, Post, Req, UseGuards } from '@nestjs/common';
+import { Body, Controller, Delete, Get, Param, ParseIntPipe, Patch, Post, Req, UploadedFile, UseGuards, UseInterceptors } from '@nestjs/common';
 import { TeamService } from '../application/TeamService';
 import { TeamInputDto } from './dto/TeamInputDto';
 import { TeamUpdateInputDto } from './dto/TeamUpdateInputDto';
 import { TeamOutputDto } from './dto/TeamOutputDto';
 import { JwtAuthGuard } from 'src/auth/JwtAuthGuard';
 import type { Request } from 'express';
+import { FileInterceptor } from '@nestjs/platform-express';
+import { diskStorage } from 'multer';
 
 @Controller('team')
 export class TeamController {
@@ -63,6 +65,26 @@ export class TeamController {
         return this.teamService.getAllPlayersOfTeam(id);
     }
 
-    
+    @Post(':id/image')
+    @UseGuards(JwtAuthGuard)
+    @UseInterceptors(FileInterceptor('file', {
+        storage: diskStorage({
+            destination: './uploads/teams',
+            filename: (_, file, cb) => {
+            const uniqueName =
+                Date.now() + '-' + Math.round(Math.random() * 1e9);
+            const safeName = file.originalname.replace(/\s+/g, '_');
+            cb(null, `${uniqueName}-${safeName}`);
+            },
+        }),
+    }))
+    uploadTeamImage(
+        @Param('id', ParseIntPipe) id: number,
+        @UploadedFile() file: Express.Multer.File,
+        @Req() req,
+    ) {
+        return this.teamService.updateImage(id, `/uploads/teams/${file.filename}`);
+    }
+
 
 }

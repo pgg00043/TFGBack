@@ -1,4 +1,5 @@
-import { Team } from "src/team/domain/Team";
+import { CompetitionOutputDto } from "src/competition/infrastructure/dto/CompetitionOutputDto";
+import { Stats } from "src/stats/domain/Stat";
 import { TeamOutputDto } from "src/team/infrastructure/dto/TeamOutputDto";
 
 export class MatchOutputDto {
@@ -10,6 +11,6 @@ export class MatchOutputDto {
   scoreAway: number;
   homeTeam?: TeamOutputDto;
   awayTeam?: TeamOutputDto;
-  competitionId?: number;
-  Stats?: any[];
+  competition: CompetitionOutputDto;
+  stats?: Stats[];
 }

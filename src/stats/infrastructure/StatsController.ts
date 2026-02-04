@@ -11,21 +11,17 @@ import { RolesGuard } from 'src/auth/RolesGuard';
 export class StatsController {
     constructor(private readonly statsService: StatsService) {}
 
-    // Público
     @Get()
     findAll(): Promise<StatsOutputDto[]> {
         return this.statsService.findAll();
     }
 
-    // Público
     @Get(':id')
     findOne(@Param('id', ParseIntPipe) id: number): Promise<StatsOutputDto | null> {
         return this.statsService.findOne(id);
     }
 
-    // Solo admin puede crear estadísticas
-    @Roles('admin')
-    @UseGuards(JwtAuthGuard, RolesGuard)
+    @UseGuards(JwtAuthGuard)
     @Post()
     createStats(
         @Body() dto: StatsInputDto
@@ -33,9 +29,7 @@ export class StatsController {
         return this.statsService.createStats(dto);
     }
 
-    // Solo admin modifica estadísticas
-    @Roles('admin')
-    @UseGuards(JwtAuthGuard, RolesGuard)
+    @UseGuards(JwtAuthGuard)
     @Patch(':id')
     updateStats(
         @Param('id', ParseIntPipe) id: number,
@@ -44,17 +38,13 @@ export class StatsController {
         return this.statsService.updateStats(id, dto);
     }
 
-    // Solo admin borra estadísticas
-    @Roles('admin')
-    @UseGuards(JwtAuthGuard, RolesGuard)
+    @UseGuards(JwtAuthGuard)
     @Delete(':id')
     deleteStats(@Param('id', ParseIntPipe) id: number) {
         return this.statsService.deleteStats(id);
     }
 
-    // Solo admin asigna un jugador a una estadística
-    @Roles('admin')
-    @UseGuards(JwtAuthGuard, RolesGuard)
+    @UseGuards(JwtAuthGuard)
     @Patch(':id/assign-player/:playerId')
     assignPlayerToStats(
         @Param('id', ParseIntPipe) statsId: number,
@@ -63,9 +53,7 @@ export class StatsController {
         return this.statsService.assignPlayerToStats(statsId, playerId);
     }
 
-    // Solo admin asigna un partido a una estadística
-    @Roles('admin')
-    @UseGuards(JwtAuthGuard, RolesGuard)
+    @UseGuards(JwtAuthGuard)
     @Patch(':id/assign-match/:matchId')
     assignMatchToStats(
         @Param('id', ParseIntPipe) statsId: number,
