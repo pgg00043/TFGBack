@@ -24,7 +24,7 @@ export class User {
   password: string;
 
   @Column()
-  imageUrl: string;
+  imageUrl?: string;
 
   @ManyToMany(() => Team, team => team.players, { eager: true })
   @JoinTable()
