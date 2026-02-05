@@ -4,6 +4,5 @@ export class UserOutputDto {
   name: string;
   surname: string;
   email: string;
-  rol: string;
   imageUrl?: string;
 }

@@ -17,9 +17,6 @@ export class User {
   @Column({ unique: true })
   email: string;
 
-  @Column()
-  rol: string;
-
   @Column({ unique: true })
   username: string;
 
