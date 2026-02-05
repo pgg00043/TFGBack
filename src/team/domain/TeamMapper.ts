@@ -33,7 +33,6 @@ export class TeamMapper {
         surname: p.surname,
         username: p.username,
         email: p.email,
-        rol: p.rol
       }));
     }
 

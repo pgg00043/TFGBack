@@ -21,8 +21,4 @@ export class UserUpdateInputDto {
   @IsOptional()
   @IsEmail()
   email?: string;
-
-  @IsOptional()
-  @IsString()
-  rol?: string;
 }
