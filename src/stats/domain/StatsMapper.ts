@@ -1,7 +1,6 @@
 import { Stats } from './Stat';
 import { StatsInputDto } from '../infrastructure/dto/StatsInputDto';
 import { StatsOutputDto } from '../infrastructure/dto/StatsOutputDto';
-import { Team } from 'src/team/domain/Team';
 
 export class StatsMapper {
 
@@ -35,7 +34,7 @@ export class StatsMapper {
     dto.turnovers = entity.turnovers;
     dto.fouls = entity.fouls;
     dto.minutesPlayed = entity.minutesPlayed;
-
+    
     dto.userId = entity.user?.id;
     dto.matchId = entity.match?.id;
 
@@ -45,4 +44,7 @@ export class StatsMapper {
   static toOutputList(entities: Stats[]): StatsOutputDto[] {
     return entities.map(s => this.toOutput(s));
   }
+
+
+  
 }

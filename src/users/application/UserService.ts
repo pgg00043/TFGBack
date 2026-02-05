@@ -158,4 +158,14 @@ export class UsersService {
     async updateImage(userId: number, imageUrl: string) {
         await this.userRepository.update(userId, { imageUrl });
     }
+
+    async searchUsersByEmail(email: string): Promise<UserOutputDto> {
+        const user = await this.userRepository.findOne({
+            where: { email },
+        });
+        if (!user) {
+            throw new NotFoundException(`User with email ${email} not found`);
+        }
+        return UserMapper.toOutput(user);
+    }
 }

@@ -7,6 +7,7 @@ import { JwtAuthGuard } from 'src/auth/JwtAuthGuard';
 import type { Request } from 'express';
 import { diskStorage } from 'multer';
 import { FileInterceptor } from '@nestjs/platform-express';
+import { StandingRowDto } from './dto/StandingRowDto';
 
 @Controller('competition')
 export class CompetitionController {
@@ -81,11 +82,11 @@ export class CompetitionController {
     }
 
     @UseGuards(JwtAuthGuard)
-    @Get(':id/teams')
-    getTeamsInCompetition(
+    @Get(':id/standings')
+    getCompetitionStandings(
         @Param('id', ParseIntPipe) competitionId: number,
-    ): Promise<any[]> {
-        return this.competitionService.getTeamsInCompetition(competitionId);
+    ): Promise<StandingRowDto[]> {
+        return this.competitionService.getCompetitionStandings(competitionId);
     }
 
     @UseGuards(JwtAuthGuard)

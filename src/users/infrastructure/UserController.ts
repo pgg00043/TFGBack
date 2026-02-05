@@ -13,6 +13,15 @@ import { FileInterceptor } from '@nestjs/platform-express';
 export class UsersController {
     constructor(private readonly usersService: UsersService) {}
 
+    @Get('search')
+    searchUsersByEmail(
+        @Query('email') email: string
+    ) {
+
+        console.log(`Searching users by email: ${email}`);
+        return this.usersService.searchUsersByEmail(email);
+    }
+
     @Post(':id/image')
     @UseGuards(JwtAuthGuard)
     @UseInterceptors(
@@ -108,13 +117,6 @@ export class UsersController {
         @Param('id', ParseIntPipe) id: number
     ) {
         return this.usersService.getUserStatsSummary(id);
-    }
-
-    @Get('search')
-    searchUsersByName(
-        @Query("query") query: string
-    ) {
-        return this.usersService.searchUsersByName(query);
     }
 
     

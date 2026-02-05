@@ -10,6 +10,7 @@ import { TeamOutputDto } from 'src/team/infrastructure/dto/TeamOutputDto';
 import { TeamMapper } from 'src/team/domain/TeamMapper';
 import { MatchMapper } from 'src/matches/domain/MatchMapper';
 import { Match } from 'src/matches/domain/Match';
+import { StandingRowDto } from '../infrastructure/dto/StandingRowDto';
 
 type GeneratedMatch = {
     homeTeamId: number;
@@ -37,7 +38,6 @@ function generateCalendar(teamIds: number[]): GeneratedMatch[][] {
         const home = teams[i];
         const away = teams[totalTeams - 1 - i];
 
-        // Ignoramos los partidos contra el equipo ficticio
         if (home !== -1 && away !== -1) {
             roundMatches.push({
             homeTeamId: home,
@@ -46,10 +46,8 @@ function generateCalendar(teamIds: number[]): GeneratedMatch[][] {
             });
         }
         }
-
         calendar.push(roundMatches);
 
-        // Rotación manteniendo fijo el primer equipo
         const last = teams.pop();
         if (last !== undefined) {
         teams.splice(1, 0, last);
@@ -145,14 +143,71 @@ export class CompetitionService {
         return CompetitionMapper.toOutput(saved);
     }
 
-    async getTeamsInCompetition(competitionId: number): Promise<TeamOutputDto[]> {
+
+    async getCompetitionStandings(competitionId: number): Promise<StandingRowDto[]> {
         const competition = await this.competitionRepository.findOne({
             where: { id: competitionId },
             relations: ['teams'],
         });
 
-        return TeamMapper.toOutputList(competition?.teams || []);
+        if (!competition) {
+            throw new NotFoundException(`Competition ${competitionId} not found`);
+        }
+        
+        const matches = await this.matchRepository.find({
+            where: { competition: { id: competitionId } },
+            relations: ['homeTeam', 'awayTeam'],
+        });
+
+        const table = new Map<number, StandingRowDto>();
+
+        competition.teams.forEach(team => {
+            table.set(team.id, {
+                id: team.id,
+                name: team.name,
+                played: 0,
+                won: 0,
+                lost: 0,
+                pointsFor: 0,
+                pointsAgainst: 0,
+            });
+        });
+
+        // Procesar partidos
+        matches.forEach(match => {
+            if (
+                match.scoreHome == null ||
+                match.scoreAway == null ||
+                (match.scoreHome === 0 && match.scoreAway === 0)
+            ) {
+                return;
+            }
+
+            const home = table.get(match.homeTeam.id)!;
+            const away = table.get(match.awayTeam.id)!;
+
+            home.played++;
+            away.played++;
+
+            home.pointsFor += match.scoreHome;
+            home.pointsAgainst += match.scoreAway;
+            away.pointsFor += match.scoreAway;
+            away.pointsAgainst += match.scoreHome;
+
+            if (match.scoreHome > match.scoreAway) {
+            home.won++;
+            away.lost++;
+            } else if (match.scoreAway > match.scoreHome) {
+            away.won++;
+            home.lost++;
+            }
+        });
+
+        return Array.from(table.values()).sort(
+            (a, b) => b.won - a.won
+        );
     }
+
 
     async getMatchesInCompetition(competitionId: number): Promise<any[]> {
         const competition = await this.competitionRepository.findOne({
@@ -213,7 +268,6 @@ export class CompetitionService {
         const teamIds = competition.teams.map(t => t.id);
         const calendar = generateCalendar(teamIds);
 
-        /* 🟢 PASO 3: GUARDAR NUEVOS PARTIDOS */
         for (const round of calendar) {
             for (const match of round) {
             const newMatch = this.matchRepository.create({

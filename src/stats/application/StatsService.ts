@@ -45,19 +45,34 @@ export class StatsService {
         return StatsMapper.toOutput(saved);
     }
 
-    async updateStats(id: number, dto: StatsUpdateInputDto): Promise<StatsOutputDto | null> {
-        const exists = await this.statsRepository.findOneBy({ id });
-        if (!exists) throw new NotFoundException(`Stats ${id} not found`);
+    async updateStats(
+        id: number,
+        dto: StatsUpdateInputDto,
+    ): Promise<StatsOutputDto> {
 
-        await this.statsRepository.update(id, dto);
-
-        const updated = await this.statsRepository.findOne({
+        const stat = await this.statsRepository.findOne({
             where: { id },
             relations: ['user', 'match'],
         });
 
-        return StatsMapper.toOutput(updated!);
+        if (!stat) {
+            throw new NotFoundException(`Stats ${id} not found`);
+        }
+
+        stat.points = dto.points ?? 0;
+        stat.rebounds = dto.rebounds ?? 0;
+        stat.assists = dto.assists ?? 0;
+        stat.steals = dto.steals ?? 0;
+        stat.blocks = dto.blocks ?? 0;
+        stat.turnovers = dto.turnovers ?? 0;
+        stat.fouls = dto.fouls ?? 0;
+        stat.minutesPlayed = dto.minutesPlayed ?? 0;
+
+        const saved = await this.statsRepository.save(stat);
+
+        return StatsMapper.toOutput(saved);
     }
+
 
     deleteStats(id: number) {
         return this.statsRepository.delete(id);
