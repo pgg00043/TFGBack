@@ -22,7 +22,5 @@ export class UserInputDto {
     @IsString({ message: 'Email must be a string' })
     @IsEmail({}, { message: 'Email must be a valid email address' })
     email: string;
-
-    @IsNotEmpty({ message: 'Role should not be empty' })
-    rol: string;
+    
 }
