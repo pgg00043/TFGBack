@@ -11,8 +11,8 @@ export class Match{
     @Column()
     date: Date;
 
-    @Column()
-    hour: string;
+    @Column({type : 'time', nullable: true})
+    hour?: string | null;
 
     @Column()
     location: string;

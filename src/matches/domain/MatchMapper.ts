@@ -9,7 +9,7 @@ export class MatchMapper {
     const m = new Match();
 
     m.date = dto.date;
-    m.hour = dto.hour;
+    m.hour = dto.hour === '' ? null : dto.hour;
     m.location = dto.location;
     m.scoreAway = dto.scoreAway ?? 0;
     m.scoreHome = dto.scoreHome ?? 0;
@@ -48,7 +48,7 @@ export class MatchMapper {
 
     dto.id = entity.id;
     dto.date = entity.date;
-    dto.hour = entity.hour;
+    dto.hour = entity.hour ?? null;
     dto.location = entity.location;
 
     dto.homeTeam = TeamMapper.toOutput(entity.homeTeam);

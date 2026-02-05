@@ -5,7 +5,7 @@ import { TeamOutputDto } from "src/team/infrastructure/dto/TeamOutputDto";
 export class MatchOutputDto {
   id: number;
   date: Date;
-  hour: string;
+  hour?: string | null;
   location: string;
   scoreHome: number;
   scoreAway: number;

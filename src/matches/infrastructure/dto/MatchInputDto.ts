@@ -1,6 +1,6 @@
 export class MatchInputDto {
   date: Date;
-  hour: string;
+  hour?: string | null;
   location: string;
   scoreHome?: number = 0;
   scoreAway?: number = 0;
